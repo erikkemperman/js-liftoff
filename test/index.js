@@ -106,7 +106,7 @@ describe('Liftoff', function () {
         configPath: 'test/fixtures/symlink/mochafile.js'
       });
       expect(env.cwd).to.equal(path.resolve('test/fixtures/symlink'));
-    })
+    });
 
   });
 
@@ -280,6 +280,60 @@ describe('Liftoff', function () {
             cwd: path.resolve('./test/fixtures/configfiles/index.json'),
           },
         });
+        done();
+      });
+    });
+
+    it('should invoke configCallback if set in options', function (done) {
+      var list = [];
+      var app = new Liftoff({
+        name: 'myapp',
+        configCallback: function(found) {
+          list.push(found.path);
+        },
+        configFiles: {
+          index: {
+            test: {
+              path: '.',
+            },
+          },
+        },
+      });
+      app.launch({}, function (env) {
+        expect(env.configFiles).to.deep.equal({
+          index: {
+            test: path.resolve('./index.js'),
+          },
+        });
+        expect(list.length).to.equal(1);
+        expect(list[0]).to.equal(path.resolve('./index.js'));
+        done();
+      });
+    });
+
+    it('should invoke callback if set in path argument', function (done) {
+      var list = [];
+      var app = new Liftoff({
+        name: 'myapp',
+        configFiles: {
+          index: {
+            test: {
+              path: '.',
+                callback: function(found) {
+                list.push(found.path);
+              },
+            },
+          },
+        },
+      });
+      app.launch({}, function (env) {
+        expect(env.configFiles).to.deep.equal({
+          index: {
+            test: path.resolve('./index.js'),
+          },
+        });
+        expect(list.length).to.equal(1);
+        expect(list[0]).to.equal(path.resolve('./index.js'));
         done();
       });
     });

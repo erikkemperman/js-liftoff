@@ -6,6 +6,7 @@ const EE = require('events').EventEmitter;
 const extend = require('extend');
 const resolve = require('resolve');
 const flaggedRespawn = require('flagged-respawn');
+const isFunction = require('lodash.isfunction');
 const isPlainObject = require('lodash.isplainobject');
 const mapValues = require('lodash.mapvalues');
 const fined = require('fined');
@@ -125,6 +126,7 @@ Liftoff.prototype.buildEnvironment = function (opts) {
   }
 
   var exts = this.extensions;
+  var cb = isFunction(this.configCallback) ? this.configCallback : false;
   var eventEmitter = this;
   registerLoader(eventEmitter, exts, configPath, cwd);
 
@@ -132,7 +134,7 @@ Liftoff.prototype.buildEnvironment = function (opts) {
   if (isPlainObject(this.configFiles)) {
     var notfound = { path: null };
     configFiles = mapValues(this.configFiles, function(prop, name) {
-      var defaultObj = { name: name, cwd: cwd, extensions: exts };
+      var defaultObj = { name: name, cwd: cwd, extensions: exts, callback: cb };
       return mapValues(prop, function(pathObj) {
         var found = fined(pathObj, defaultObj) || notfound;
         if (isPlainObject(found.extension)) {
